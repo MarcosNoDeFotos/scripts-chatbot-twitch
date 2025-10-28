@@ -49,7 +49,7 @@ def reproducirSusto(userId, horaEjecucionComando):
     
 
 def destacarMensaje(userId, mensaje, horaEjecucionComando):
-    http_get(SERVER_CONTROL+"/destacarMensaje?user="+userId+"&mensaje="+mensaje)
+    http_get(SERVER_CONTROL+"/destacarMensaje?user="+userId+"&origen=twitch&mensaje="+mensaje)
     ultimo_uso[userId] = horaEjecucionComando
     coste = COSTES_CANJEOS["destacar"]
     displayName = Parent.GetDisplayName(userId)
