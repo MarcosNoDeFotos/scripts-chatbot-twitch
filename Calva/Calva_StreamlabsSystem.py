@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 ScriptName = "Besos Calva";
 Website = "";
 Description = "Cuenta los besos en la calva que llevo";
@@ -6,27 +7,30 @@ Creator = "MarcosNoDeFotos";
 Version = "1.0.0";
 
 COMANDO = "!calva";
-datosCalva = "besos";
+CURRENT_PATH = os.path.dirname(__file__).replace("\\", "/") + "/"
+FILE_PATH = CURRENT_PATH+"besos.txt"
 
-def enviarMensaje(mensaje):
-    Parent.SendStreamMessage(mensaje);
 
 def Init():
     return;
 
 def Execute(data):
-    besos = 0;
-    with open(datosCalva) as f:
-        besos = int(f.readlines()[0]);
-    
     if data.GetParam(0) != COMANDO:
         return;
-    username = data.UserName;
-    besos = besos+1;
-    f = open(datosCalva, "w");
-    f.write(str(besos));
-    f.close();
-    enviarMensaje(username+" me ha dado un beso en la calva. Ya llevo "+str(besos)+" besos");
+    besos = 0
+    if not os.path.exists(FILE_PATH):
+        with open(FILE_PATH, "w") as f:
+            f.write("1")
+            f.close()
+        besos = 1
+    else:
+        with open(FILE_PATH, "r+") as f:
+            besos = int(f.read().strip())+1
+            f.seek(0)
+            f.write(str(besos))
+            f.truncate()
+            f.close()
+    Parent.SendStreamMessage(data.UserName+" me ha dado un beso en la calva. Ya llevo "+str(besos)+" besos");
     return;
 
 def Tick():
