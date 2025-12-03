@@ -18,7 +18,7 @@ COMANDOS = ["!led", "!leds"]
 COOLDOWN = 5*60 #Segundos
 # COOLDOWN = 2 #Segundos
 RGB_ENDPOINT_COLOR = "http://192.168.1.189:5000/rgb_establecerColor"
-RGB_ENDPOINT_ANIMACION = "http://192.168.1.189:5000/rgb_establecerAnimacion"
+STREAMER_NAME = "marcosnodefotos"
 
 lastTimeExecuted = 0
 
@@ -29,10 +29,19 @@ coloresValidos = {
     "morado": "168,0,146",
     "amarillo" : "214,179",
     "furcia": "230,0,111",
-    "rainbow": "0,0,0",
     "blanco": "255,255,255",
     "apagado": "0,0,0",
 }
+
+efectosValidos = [
+    "static",
+    "loop",
+    "vuelta",
+    "fill",
+    "random",
+    "destello",
+]
+
 
 
 def http_post(url, data):
@@ -45,9 +54,7 @@ def http_post(url, data):
 
 
 def enviarColor(color, efecto):
-    http_post(RGB_ENDPOINT_COLOR, data={"color": color})
-    sleep(2)
-    http_post(RGB_ENDPOINT_ANIMACION, data={"animacion": efecto})
+    http_post(RGB_ENDPOINT_COLOR, data={"color": color, "animacion": efecto})
 
 
 def Init():
@@ -63,28 +70,25 @@ def Execute(data):
     else:
         global lastTimeExecuted
         if data.GetParamCount() == 1 or (data.GetParamCount() == 2 and data.GetParam(1) == "help"):
-            Parent.SendStreamMessage("!leds [color]: ¡Usa este comando para cambiar el color de mi gorro! Colores disponibles: "+(', '.join(coloresValidos.keys())))     
+            Parent.SendStreamMessage("!leds [color] [efecto]: ¡Cambia el color de mi gorro! Efectos válidos: "+(', '.join(efectosValidos))+". Ejemplo: !leds rojo random")     
         elif data.GetParamCount() == 2:
             color = data.GetParam(1)
             efecto = "loop"
-            if str(color).strip()!="help":
+            if data.GetParamCount() >= 3:
+                if data.GetParam(2) in efectosValidos:
+                    efecto = data.GetParam(2)
+            if color == "reset" and data.UserName.lower() == STREAMER_NAME.lower():
+                lastTimeExecuted = 0
+                Parent.SendStreamMessage("👌")
+            elif str(color).strip()!="help":
                 if lastTimeExecuted == 0 or time()-lastTimeExecuted >= COOLDOWN:
                     lastTimeExecuted = time()
-                    colorEsHexa = True
-                    try:
-                        int(color[1:], 16);
-                    except:
-                        colorEsHexa = False
                     if color in coloresValidos.keys():
-                        if color == "rainbow":
-                            enviarColor("0,0,0", "rgbLoco"); 
-                        else:
-                            enviarColor(coloresValidos[color], efecto); 
+                        enviarColor(coloresValidos[color], efecto); 
                         Parent.SendStreamMessage(data.UserName+" ha cambiado el color de mi gorro!!!")
-                    # elif (str(color).__len__()==7 and str(color)[0:1] == "#" and colorEsHexa):
-                    #     enviarColor(coloresValidos[color]); 
-                    #     bot.send_stream_message(author+" ha cambiado el color de mi gorro!!!")
-
+                    if color == "multicolor":
+                        enviarColor("", "multicolor")
+                        Parent.SendStreamMessage(data.UserName+" ha cambiado el color de mi gorro!!!")
                 else:
                     Parent.SendStreamMessage("Que me vas a fundir las luces!! Espérate un ratico ("+str(int(COOLDOWN-(time()-lastTimeExecuted)))+"s)")
     return;
