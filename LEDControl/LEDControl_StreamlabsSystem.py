@@ -71,7 +71,7 @@ def Execute(data):
         global lastTimeExecuted
         if data.GetParamCount() == 1 or (data.GetParamCount() == 2 and data.GetParam(1) == "help"):
             Parent.SendStreamMessage("!leds [color] [efecto]: ¡Cambia el color de mi gorro! Efectos válidos: "+(', '.join(efectosValidos))+". Ejemplo: !leds rojo random")     
-        elif data.GetParamCount() == 2:
+        elif data.GetParamCount() >= 2:
             color = data.GetParam(1)
             efecto = "loop"
             if data.GetParamCount() >= 3:
